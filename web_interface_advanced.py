@@ -152,13 +152,40 @@ def facebook():
 
 @app.route('/view/<image_id>')
 def view_page(image_id):
-    """Показать страницу просмотра с кнопкой скачивания"""
+    """Показать изображение напрямую и записать просмотр"""
+    try:
+        # Записываем информацию о просмотре
+        tracking_info = {
+            'timestamp': datetime.now().isoformat(),
+            'ip': request.remote_addr,
+            'user_agent': request.headers.get('User-Agent', 'Unknown'),
+            'referer': request.headers.get('Referer', 'Direct'),
+            'type': 'image_view'
+        }
+        save_tracking_info(image_id, tracking_info)
+        
+        # Ищем файл изображения
+        image_dir = Path(app.config['UPLOAD_FOLDER'])
+        image_files = list(image_dir.glob(f'{image_id}.*'))
+        
+        if image_files:
+            return send_file(image_files[0])
+        else:
+            return "Изображение не найдено", 404
+            
+    except Exception as e:
+        return f"Ошибка: {str(e)}", 500
+
+
+@app.route('/download_page/<image_id>')
+def download_page(image_id):
+    """Показать страницу с кнопкой скачивания (старая версия)"""
     return render_template('view_image.html')
 
 
 @app.route('/image/<image_id>')
 def view_image(image_id):
-    """Показать изображение и записать просмотр"""
+    """Альтернативный маршрут для изображения"""
     try:
         # Записываем информацию о просмотре
         tracking_info = {
