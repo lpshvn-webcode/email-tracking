@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Downloading...</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 30px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        p {
+            font-size: 18px;
+            opacity: 0.9;
+        }
+        .manual-link {
+            margin-top: 30px;
+            padding: 15px 30px;
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            border-radius: 10px;
+            display: inline-block;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        .manual-link:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📥 Downloading...</h1>
+        <div class="spinner"></div>
+        <p>Your file is being downloaded.</p>
+        <p style="font-size: 14px; margin-top: 20px; opacity: 0.7;">If download doesn't start automatically:</p>
+        <a href="{{ download_url }}" class="manual-link" download>Click here to download</a>
+    </div>
+    
+    <script>
+        // Автоматическое скачивание файла
+        window.onload = function() {
+            // Создаем невидимый iframe для скачивания
+            var iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = '{{ download_url }}';
+            document.body.appendChild(iframe);
+            
+            // Альтернативный метод через ссылку
+            setTimeout(function() {
+                var link = document.createElement('a');
+                link.href = '{{ download_url }}';
+                link.download = 'photo.jpg';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }, 500);
+        };
+    </script>
+</body>
+</html>

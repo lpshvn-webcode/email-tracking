@@ -184,7 +184,38 @@ def view_page(image_id):
 
 @app.route('/download/<image_id>')
 def download_image(image_id):
-    """Скачать изображение напрямую (force download)"""
+    """Показать страницу авто-скачивания"""
+    try:
+        # Записываем информацию о просмотре страницы
+        tracking_info = {
+            'timestamp': datetime.now().isoformat(),
+            'ip': request.remote_addr,
+            'user_agent': request.headers.get('User-Agent', 'Unknown'),
+            'referer': request.headers.get('Referer', 'Direct'),
+            'type': 'download_page_view'
+        }
+        save_tracking_info(image_id, tracking_info)
+        
+        # Проверяем что файл существует
+        image_dir = Path(app.config['UPLOAD_FOLDER'])
+        image_files = list(image_dir.glob(f'{image_id}.*'))
+        
+        if not image_files:
+            return "Изображение не найдено", 404
+        
+        # Показываем страницу с автоматическим скачиванием
+        BASE_URL = os.environ.get('BASE_URL', 'http://127.0.0.1:5000')
+        download_url = f"{BASE_URL}/download_file/{image_id}"
+        
+        return render_template('auto_download.html', download_url=download_url)
+            
+    except Exception as e:
+        return f"Ошибка: {str(e)}", 500
+
+
+@app.route('/download_file/<image_id>')
+def download_file(image_id):
+    """Прямое скачивание файла (force download)"""
     try:
         # Записываем информацию о скачивании
         tracking_info = {
@@ -192,7 +223,7 @@ def download_image(image_id):
             'ip': request.remote_addr,
             'user_agent': request.headers.get('User-Agent', 'Unknown'),
             'referer': request.headers.get('Referer', 'Direct'),
-            'type': 'download'
+            'type': 'file_download'
         }
         save_tracking_info(image_id, tracking_info)
         
@@ -202,11 +233,15 @@ def download_image(image_id):
         
         if image_files:
             # FORCE DOWNLOAD - браузер должен скачать файл, а не открыть
-            return send_file(
+            response = send_file(
                 image_files[0],
                 as_attachment=True,
                 download_name=f"photo{image_files[0].suffix}"
             )
+            # Дополнительные заголовки для принудительного скачивания
+            response.headers['Content-Disposition'] = f'attachment; filename="photo{image_files[0].suffix}"'
+            response.headers['X-Content-Type-Options'] = 'nosniff'
+            return response
         else:
             return "Изображение не найдено", 404
             
