@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Photo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: white;
+            color: #000;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #000;
+        }
+
+        .image-container {
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #000;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .image-container.blurred img {
+            filter: blur(20px);
+        }
+
+        .download-btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: #000;
+            color: #fff;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #000;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: all 0.3s;
+        }
+
+        .download-btn:hover {
+            background: #fff;
+            color: #000;
+        }
+
+        .message {
+            font-size: 16px;
+            color: #000;
+            margin-top: 20px;
+        }
+
+        .success-message {
+            display: none;
+            font-size: 18px;
+            color: #000;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Photo</h1>
+
+        <div id="imageContainer" class="image-container blurred">
+            <img id="photoImage" src="" alt="Photo">
+        </div>
+
+        <button class="download-btn" id="downloadBtn" onclick="downloadImage()">
+            Download Photo
+        </button>
+
+        <div class="message" id="message">
+            Click the button to download
+        </div>
+
+        <div class="success-message" id="successMessage">
+            ✓ Download started
+        </div>
+    </div>
+
+    <script>
+        // Получаем ID из URL
+        const pathParts = window.location.pathname.split('/');
+        const imageId = pathParts[pathParts.length - 1];
+
+        // Загружаем изображение
+        const img = document.getElementById('photoImage');
+        img.src = `/image/${imageId}`;
+
+        // Функция скачивания
+        async function downloadImage() {
+            try {
+                // Отправляем tracking
+                await fetch(`/track_download/${imageId}`, {
+                    method: 'POST'
+                });
+
+                // Скачиваем изображение
+                const link = document.createElement('a');
+                link.href = `/image/${imageId}`;
+                link.download = `photo_${imageId}.jpg`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                // Показываем сообщение и разблокируем изображение
+                document.getElementById('message').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+                document.getElementById('imageContainer').classList.remove('blurred');
+                document.getElementById('downloadBtn').style.display = 'none';
+
+            } catch (error) {
+                console.error('Download error:', error);
+            }
+        }
+    </script>
+</body>
+</html>

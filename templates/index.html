@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Отправка Email с Измененной Датой</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+
+        .warning p {
+            color: #856404;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="email"],
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 15px;
+            background: #f8f9fa;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .file-input-label:hover {
+            background: #e9ecef;
+            border-color: #667eea;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .datetime-group {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 15px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .result-info {
+            font-size: 13px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loader-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .info-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 12px;
+            margin-left: 5px;
+            cursor: help;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .datetime-group {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📧 Отправка Email с Измененной Датой</h1>
+            <p>Дипломная работа по кибербезопасности</p>
+        </div>
+
+        <div class="warning">
+            <p>⚠️ <strong>Внимание:</strong> Этот инструмент создан для образовательных целей. Используйте только для исследований и тестирования.</p>
+        </div>
+
+        <form id="emailForm">
+            <div class="form-group">
+                <label for="sender">Email отправителя</label>
+                <input type="email" id="sender" name="sender" placeholder="sender@example.com" value="sknfjknjwgn@dkvng.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="recipient">Email получателя</label>
+                <input type="email" id="recipient" name="recipient" placeholder="recipient@example.com" value="ulnnrpna@bientotmail.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="subject">Тема письма</label>
+                <input type="text" id="subject" name="subject" placeholder="Введите тему письма" value="Тестовое письмо для исследования" required>
+            </div>
+
+            <div class="form-group">
+                <label for="body">Текст письма</label>
+                <textarea id="body" name="body" placeholder="Введите текст письма..." required>Здравствуйте!
+
+Это тестовое письмо отправлено в рамках исследования по кибербезопасности.
+
+При просмотре исходного текста письма обратите внимание на разницу между заголовками Date и Received.
+
+С уважением</textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Дата и время которые увидит получатель <span class="info-icon" title="Эта дата будет отображаться в почтовом клиенте">?</span></label>
+                <div class="datetime-group">
+                    <input type="date" id="fake_date" name="fake_date" value="2026-07-07" required>
+                    <input type="time" id="fake_time" name="fake_time" value="10:00" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="attachment">Вложение (необязательно)</label>
+                <div class="file-input-wrapper">
+                    <input type="file" id="attachment" name="attachment">
+                    <label for="attachment" class="file-input-label">
+                        📎 Выберите файл для прикрепления
+                    </label>
+                </div>
+                <div class="file-name" id="fileName"></div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submitBtn">
+                🚀 Отправить письмо
+            </button>
+        </form>
+
+        <div class="loader" id="loader">
+            <div class="loader-spinner"></div>
+            <p style="margin-top: 10px; color: #666;">Отправка письма...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        // Обработка выбора файла
+        document.getElementById('attachment').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name;
+            const fileNameDiv = document.getElementById('fileName');
+            if (fileName) {
+                fileNameDiv.textContent = `✓ Выбран файл: ${fileName}`;
+                fileNameDiv.style.color = '#28a745';
+            } else {
+                fileNameDiv.textContent = '';
+            }
+        });
+
+        // Обработка отправки формы
+        document.getElementById('emailForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const loader = document.getElementById('loader');
+            const result = document.getElementById('result');
+            
+            // Показываем загрузку
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Отправка...';
+            loader.style.display = 'block';
+            result.style.display = 'none';
+            
+            try {
+                const formData = new FormData(this);
+                
+                const response = await fetch('/send', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                // Скрываем загрузку
+                loader.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Отправить письмо';
+                
+                // Показываем результат
+                result.style.display = 'block';
+                result.className = 'result ' + (data.success ? 'success' : 'error');
+                
+                if (data.success) {
+                    result.innerHTML = `
+                        <div class="result-title">✅ Успешно отправлено!</div>
+                        <p>${data.message}</p>
+                        <div class="result-info">
+                            <strong>📅 Дата в письме:</strong> ${data.fake_date}<br>
+                            <strong>🕐 Реальное время:</strong> ${data.real_time}<br><br>
+                            <strong>💡 Совет:</strong> Откройте полученное письмо и посмотрите исходный текст (View Source), чтобы увидеть разницу между заголовками Date и Received.
+                        </div>
+                    `;
+                } else {
+                    result.innerHTML = `
+                        <div class="result-title">❌ Ошибка отправки</div>
+                        <p>${data.message}</p>
+                        <div class="result-info">
+                            <strong>Возможные решения:</strong><br>
+                            • Проверьте правильность email адресов<br>
+                            • Убедитесь что порт 25 не заблокирован<br>
+                            • Попробуйте использовать VPN
+                        </div>
+                    `;
+                }
+                
+                // Прокручиваем к результату
+                result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                
+            } catch (error) {
+                loader.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Отправить письмо';
+                
+                result.style.display = 'block';
+                result.className = 'result error';
+                result.innerHTML = `
+                    <div class="result-title">❌ Ошибка</div>
+                    <p>Произошла ошибка при отправке: ${error.message}</p>
+                `;
+            }
+        });
+
+        // Устанавливаем текущую дату по умолчанию
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('fake_date').value = today;
+    </script>
+</body>
+</html>
