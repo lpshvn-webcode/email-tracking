@@ -308,7 +308,7 @@ def upload_image():
         
         # Создаем URL (используем BASE_URL из переменных окружения или localhost)
         BASE_URL = os.environ.get('BASE_URL', 'http://127.0.0.1:5000')
-        image_url = f"{BASE_URL}/view/{tracking_id}"
+        image_url = f"{BASE_URL}/image/{tracking_id}"
         tracking_url = f"{BASE_URL}/tracking/{tracking_id}"
         
         return jsonify({
