@@ -169,7 +169,12 @@ def view_page(image_id):
         image_files = list(image_dir.glob(f'{image_id}.*'))
         
         if image_files:
-            return send_file(image_files[0])
+            # Отправляем файл для скачивания (не открывая в браузере)
+            return send_file(
+                image_files[0],
+                as_attachment=True,
+                download_name=image_files[0].name
+            )
         else:
             return "Изображение не найдено", 404
             
