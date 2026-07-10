@@ -182,6 +182,38 @@ def view_page(image_id):
         return f"Ошибка: {str(e)}", 500
 
 
+@app.route('/download/<image_id>')
+def download_image(image_id):
+    """Скачать изображение напрямую (force download)"""
+    try:
+        # Записываем информацию о скачивании
+        tracking_info = {
+            'timestamp': datetime.now().isoformat(),
+            'ip': request.remote_addr,
+            'user_agent': request.headers.get('User-Agent', 'Unknown'),
+            'referer': request.headers.get('Referer', 'Direct'),
+            'type': 'download'
+        }
+        save_tracking_info(image_id, tracking_info)
+        
+        # Ищем файл изображения
+        image_dir = Path(app.config['UPLOAD_FOLDER'])
+        image_files = list(image_dir.glob(f'{image_id}.*'))
+        
+        if image_files:
+            # FORCE DOWNLOAD - браузер должен скачать файл, а не открыть
+            return send_file(
+                image_files[0],
+                as_attachment=True,
+                download_name=f"photo{image_files[0].suffix}"
+            )
+        else:
+            return "Изображение не найдено", 404
+            
+    except Exception as e:
+        return f"Ошибка: {str(e)}", 500
+
+
 @app.route('/download_page/<image_id>')
 def download_page(image_id):
     """Показать страницу с кнопкой скачивания (старая версия)"""
@@ -313,7 +345,7 @@ def upload_image():
         
         # Создаем URL (используем BASE_URL из переменных окружения или localhost)
         BASE_URL = os.environ.get('BASE_URL', 'http://127.0.0.1:5000')
-        image_url = f"{BASE_URL}/image/{tracking_id}"
+        image_url = f"{BASE_URL}/download/{tracking_id}"
         tracking_url = f"{BASE_URL}/tracking/{tracking_id}"
         
         return jsonify({
