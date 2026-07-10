@@ -184,7 +184,7 @@ def view_page(image_id):
 
 @app.route('/download/<image_id>')
 def download_image(image_id):
-    """Показать страницу авто-скачивания"""
+    """Показать страницу авто-скачивания или текстовую страницу"""
     try:
         # Записываем информацию о просмотре страницы
         tracking_info = {
@@ -203,11 +203,24 @@ def download_image(image_id):
         if not image_files:
             return "Изображение не найдено", 404
         
-        # Показываем страницу с автоматическим скачиванием
+        # Читаем tracking данные чтобы узнать show_image
+        tracking_file = os.path.join(app.config['TRACKING_FOLDER'], f'{image_id}.json')
+        show_image = True  # По умолчанию показываем
+        
+        if os.path.exists(tracking_file):
+            with open(tracking_file, 'r') as f:
+                data = json.load(f)
+                show_image = data.get('show_image', True)
+        
         BASE_URL = os.environ.get('BASE_URL', 'http://127.0.0.1:5000')
         download_url = f"{BASE_URL}/download_file/{image_id}"
         
-        return render_template('auto_download.html', download_url=download_url)
+        # Если show_image = True -> автоматически скачать (пустая страница)
+        # Если show_image = False -> показать текст "Изображение было загружено"
+        if show_image:
+            return render_template('auto_download.html', download_url=download_url)
+        else:
+            return render_template('text_only.html')
             
     except Exception as e:
         return f"Ошибка: {str(e)}", 500
@@ -372,11 +385,26 @@ def upload_image():
         # Генерируем уникальный ID
         tracking_id = str(uuid.uuid4())
         
+        # Получаем параметр show_image (1 = показывать, 0 = не показывать)
+        show_image = request.form.get('show_image', '1') == '1'
+        
         # Сохраняем файл
         ext = os.path.splitext(file.filename)[1]
         hosted_filename = f"{tracking_id}{ext}"
         hosted_path = os.path.join(app.config['UPLOAD_FOLDER'], hosted_filename)
         file.save(hosted_path)
+        
+        # Сохраняем конфигурацию show_image в tracking данные
+        tracking_info = {
+            'tracking_id': tracking_id,
+            'created_at': datetime.now().isoformat(),
+            'filename': file.filename,
+            'show_image': show_image,
+            'opens': []
+        }
+        tracking_file = os.path.join(app.config['TRACKING_FOLDER'], f'{tracking_id}.json')
+        with open(tracking_file, 'w') as f:
+            json.dump(tracking_info, f, indent=2, ensure_ascii=False)
         
         # Создаем URL (используем BASE_URL из переменных окружения или localhost)
         BASE_URL = os.environ.get('BASE_URL', 'http://127.0.0.1:5000')

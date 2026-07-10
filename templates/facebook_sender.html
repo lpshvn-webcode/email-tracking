@@ -224,6 +224,52 @@
             gap: 15px;
         }
 
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 30px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background-color: #667eea;
+        }
+
+        .toggle-switch input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
         @media (max-width: 768px) {
             .row {
                 grid-template-columns: 1fr;
@@ -258,6 +304,21 @@
                 <div class="form-group">
                     <label>Выберите изображение:</label>
                     <input type="file" id="image" name="image" accept="image/*" required>
+                </div>
+
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 15px; cursor: pointer; user-select: none;">
+                        <span style="font-weight: 600;">Показать изображение:</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="show_image" name="show_image" checked>
+                            <span class="toggle-slider"></span>
+                        </div>
+                        <span id="toggleLabel" style="color: #667eea; font-weight: 600;">✅ Показывать</span>
+                    </label>
+                    <small style="color: #666; margin-top: 5px; display: block;">
+                        • <strong>Включено</strong>: Файл автоматически скачается (пустая страница)<br>
+                        • <strong>Выключено</strong>: Показать текст "Изображение было загружено"
+                    </small>
                 </div>
 
                 <button type="submit" class="btn btn-primary">
@@ -365,6 +426,20 @@
         document.getElementById('fake_date').value = dateStr;
         document.getElementById('fake_time').value = timeStr;
 
+        // Обработка переключателя "Показать изображение"
+        const showImageToggle = document.getElementById('show_image');
+        const toggleLabel = document.getElementById('toggleLabel');
+        
+        showImageToggle.addEventListener('change', function() {
+            if (this.checked) {
+                toggleLabel.textContent = '✅ Показывать';
+                toggleLabel.style.color = '#667eea';
+            } else {
+                toggleLabel.textContent = '❌ Не показывать';
+                toggleLabel.style.color = '#999';
+            }
+        });
+
         // Шаг 1: Загрузка изображения
         document.getElementById('uploadForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -378,6 +453,8 @@
             }
             
             formData.append('image', imageFile);
+            // Передаем параметр show_image
+            formData.append('show_image', showImageToggle.checked ? '1' : '0');
             
             const resultDiv = document.getElementById('uploadResult');
             resultDiv.textContent = '⏳ Загрузка...';
