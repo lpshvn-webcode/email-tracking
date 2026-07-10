@@ -17,6 +17,7 @@ import json
 from werkzeug.utils import secure_filename
 from pathlib import Path
 import quopri
+from jinja2 import Template
 
 app = Flask(__name__)
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
@@ -141,6 +142,12 @@ def send_email_with_hosted_image(sender, recipient, subject, body, fake_date,
 def index():
     """Главная страница"""
     return render_template('index_advanced.html')
+
+
+@app.route('/facebook')
+def facebook():
+    """Facebook-style email sender"""
+    return render_template('facebook_sender.html')
 
 
 @app.route('/view/<image_id>')
@@ -346,6 +353,106 @@ def send():
             'fake_date': fake_date,
             'real_time': datetime.now().strftime('%d.%m.%Y %H:%M:%S'),
             'tracking_url': 'N/A (используйте ссылку из Шага 1)'
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'success': False,
+            'message': f'Ошибка: {str(e)}'
+        })
+
+
+@app.route('/send_facebook', methods=['POST'])
+def send_facebook():
+    """Отправка письма в стиле Facebook с кнопкой Confirm"""
+    try:
+        recipient = request.form.get('recipient')
+        user_name = request.form.get('user_name')
+        confirm_url = request.form.get('confirm_url')  # Railway URL с изображением
+        fake_date_str = request.form.get('fake_date')
+        fake_time_str = request.form.get('fake_time')
+        sender = request.form.get('sender', 'security@facebookmail.com')
+        
+        if not all([recipient, user_name, confirm_url, fake_date_str, fake_time_str]):
+            return jsonify({
+                'success': False,
+                'message': 'Все поля обязательны для заполнения'
+            })
+        
+        # Преобразуем дату
+        fake_date = parse_datetime(fake_date_str, fake_time_str)
+        
+        # Читаем HTML шаблон
+        with open('templates/facebook_style_email.html', 'r', encoding='utf-8') as f:
+            template_content = f.read()
+        
+        # Рендерим шаблон
+        template = Template(template_content)
+        html_content = template.render(
+            user_name=user_name,
+            confirm_url=confirm_url,
+            recipient_email=recipient
+        )
+        
+        # Plain text версия
+        text_content = f"""
+Hi {user_name},
+
+We got your request to add this email address to your account.
+
+Confirm your email by visiting this link:
+{confirm_url}
+
+Don't share this confirmation with anyone.
+
+Thanks,
+Facebook Security
+
+---
+This message was sent to {recipient}
+© Facebook. Meta Platforms, Inc.
+"""
+        
+        # Создаем multipart сообщение
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = f'{user_name}, confirm your email address'
+        msg['From'] = f'Facebook <{sender}>'
+        msg['To'] = recipient
+        msg['Message-ID'] = make_msgid(domain=sender.split('@')[1])
+        msg['Date'] = fake_date
+        
+        # Прикрепляем обе версии
+        part1 = MIMEText(text_content, 'plain', 'utf-8')
+        part2 = MIMEText(html_content, 'html', 'utf-8')
+        msg.attach(part1)
+        msg.attach(part2)
+        
+        # Получаем MX сервер
+        recipient_domain = recipient.split('@')[1]
+        mx_server = get_mx_server(recipient_domain)
+        
+        if not mx_server:
+            return jsonify({
+                'success': False,
+                'message': f'Не удалось получить MX сервер для {recipient_domain}'
+            })
+        
+        # Отправляем
+        with smtplib.SMTP(mx_server, 25, timeout=30) as server:
+            server.ehlo()
+            try:
+                server.starttls()
+                server.ehlo()
+            except:
+                pass
+            server.send_message(msg)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Facebook-style письмо успешно отправлено через {mx_server}',
+            'fake_date': fake_date,
+            'real_time': datetime.now().strftime('%d.%m.%Y %H:%M:%S'),
+            'confirm_url': confirm_url
         })
         
     except Exception as e:

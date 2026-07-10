@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: Helvetica, Arial, sans-serif; background-color: #f2f3f5;">
+    <!-- Header -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #3b5998; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td>
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td width="50">
+                                        <!-- Facebook logo -->
+                                        <div style="width: 40px; height: 40px; background-color: #ffffff; border-radius: 50%; display: inline-block; text-align: center; line-height: 40px; color: #3b5998; font-size: 24px; font-weight: bold;">f</div>
+                                    </td>
+                                    <td align="right" style="color: #ffffff; font-size: 14px;">
+                                        {{ user_name }}
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Main Content -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f2f3f5; padding: 20px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" border="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;">
+                    <tr>
+                        <td style="padding: 40px 30px;">
+                            <!-- Title -->
+                            <h1 style="margin: 0 0 20px 0; font-size: 24px; font-weight: bold; color: #1c1e21;">
+                                One more step to confirm this email address
+                            </h1>
+                            
+                            <!-- Greeting -->
+                            <p style="margin: 0 0 15px 0; font-size: 15px; color: #1c1e21; line-height: 20px;">
+                                Hi {{ user_name }},
+                            </p>
+                            
+                            <!-- Message -->
+                            <p style="margin: 0 0 20px 0; font-size: 15px; color: #1c1e21; line-height: 20px;">
+                                We got your request to add this email address to your account. Click the button below to confirm:
+                            </p>
+                            
+                            <!-- Confirm Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 30px 0;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ confirm_url }}" style="display: inline-block; background-color: #1877f2; color: #ffffff; text-decoration: none; padding: 12px 40px; border-radius: 6px; font-size: 16px; font-weight: 600;">
+                                            Confirm Email
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- Warning -->
+                            <p style="margin: 20px 0 0 0; font-size: 13px; color: #65676b; line-height: 18px; font-style: italic;">
+                                Don't share this confirmation with anyone.
+                            </p>
+                            
+                            <!-- Didn't request section -->
+                            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e4e6eb;">
+                                <p style="margin: 0 0 10px 0; font-size: 15px; color: #1c1e21; font-weight: bold;">
+                                    Didn't request this?
+                                </p>
+                                <p style="margin: 0; font-size: 14px; color: #65676b; line-height: 20px;">
+                                    If you got this email but aren't trying to confirm your email address, it's possible someone is trying to access your account. As long as you don't click the button, you don't need to take any further steps.
+                                </p>
+                            </div>
+                            
+                            <!-- Signature -->
+                            <p style="margin: 30px 0 0 0; font-size: 14px; color: #1c1e21;">
+                                Thanks,<br>
+                                Facebook Security
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Footer -->
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f2f3f5; padding: 20px 0 40px 0;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" border="0">
+                    <tr>
+                        <td style="padding: 20px 0; border-top: 1px solid #dadde1;">
+                            <p style="margin: 0 0 10px 0; font-size: 12px; color: #65676b; text-align: center;">
+                                Wondering if this email is really from us? Visit the Help Center to confirm:<br>
+                                <a href="https://www.facebook.com/help/check-email" style="color: #385898; text-decoration: none;">www.facebook.com/help/check-email</a>
+                            </p>
+                            
+                            <!-- Meta logo -->
+                            <div style="text-align: center; margin: 20px 0 10px 0;">
+                                <span style="font-size: 11px; color: #8a8d91;">from</span><br>
+                                <span style="font-size: 20px; color: #1c1e21; font-weight: bold;">Meta</span>
+                            </div>
+                            
+                            <p style="margin: 10px 0 0 0; font-size: 11px; color: #8a8d91; text-align: center; line-height: 16px;">
+                                © Facebook. Meta Platforms, Inc., Attention: Community Support, 1 Meta Way, Menlo Park, CA 94025
+                            </p>
+                            
+                            <p style="margin: 10px 0 0 0; font-size: 11px; color: #8a8d91; text-align: center;">
+                                This message was sent to <a href="mailto:{{ recipient_email }}" style="color: #385898; text-decoration: none;">{{ recipient_email }}</a>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
